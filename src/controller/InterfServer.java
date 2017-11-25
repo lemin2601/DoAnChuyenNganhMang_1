@@ -12,7 +12,15 @@ import java.rmi.RemoteException;
 public interface InterfServer extends Remote {
 
     <T> T execute(Task<T> t) throws RemoteException;
+
+    /**
+     *
+     * @param ip
+     * @return
+     * @throws RemoteException
+     */
     String getIP() throws RemoteException;
+    void setIP(String ip) throws RemoteException;
     void CheckConnection() throws  RemoteException;
     boolean AddServer(InterfServer server) throws  RemoteException;
     boolean RemoveServer(InterfServer server) throws  RemoteException;
