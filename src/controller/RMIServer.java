@@ -13,7 +13,7 @@ import java.util.ArrayList;
 public class RMIServer extends UnicastRemoteObject implements InterfServer {
 
 
-    private LamportManager lamportManager;      // qu?n lý thu?t toán lamport và x? lý các message
+    private LamportManager lamportManager;      // qu?n lï¿½ thu?t toï¿½n lamport vï¿½ x? lï¿½ cï¿½c message
     private DataManager dataManager;
     private InterfServer interfServer;              // Interface RMI
     private String myIP;
@@ -39,11 +39,6 @@ public class RMIServer extends UnicastRemoteObject implements InterfServer {
     @Override
     public <T> T execute(Task<T> t) throws RemoteException {
         return null;
-    }
-
-    @Override
-    public String getIP() throws RemoteException {
-        return this.myIP;
     }
 
     @Override
@@ -101,5 +96,15 @@ public class RMIServer extends UnicastRemoteObject implements InterfServer {
 
     public void setInterfServer(InterfServer interfServer) {
         this.interfServer = interfServer;
+    }
+    
+    public void setIP(String ip) throws RemoteException {
+        this.myIP = ip;
+    }
+
+
+    @Override
+    public String getIP() throws RemoteException {
+        return this.myIP;
     }
 }
