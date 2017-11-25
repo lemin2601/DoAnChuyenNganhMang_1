@@ -8,19 +8,30 @@ import bean.Ticket;
 import java.rmi.RemoteException;
 import java.rmi.server.UnicastRemoteObject;
 import java.util.ArrayList;
+import javax.swing.JFrame;
+import lib.CCColor;
+import lib.CCLOG;
 
 public class RMIDatabase extends UnicastRemoteObject implements InterfDatabase {
 
     static ArrayList<InterfServer> servers;
     DataManager dataManager;
     int numOfClient = 0;
+    CCLOG cclog;
+    
     public RMIDatabase() throws RemoteException {
         super();
         servers = new ArrayList<>();
         this.dataManager = new DataManager();
-
     }
 
+    public RMIDatabase(CCLOG cclog) throws RemoteException {
+        super();
+        this.cclog = cclog;
+        servers = new ArrayList<>();
+        this.dataManager = new DataManager();
+    }
+    
     @Override
     public <T> T execute(Task<T> t) throws RemoteException {
         return null;
@@ -33,18 +44,19 @@ public class RMIDatabase extends UnicastRemoteObject implements InterfDatabase {
 
     @Override
     public int UpdateTicket(Ticket ticket) throws RemoteException {
+        if(cclog != null)cclog.log("Call Update Ticket" , CCColor.BLACK);
         return dataManager.updateTicket(ticket);
     }
 
     @Override
     public ArrayList<Ticket> getTicketLists() throws RemoteException {
-        //tr? v? danh sách ch? tr?ng trong database
+        //tr? v? danh sï¿½ch ch? tr?ng trong database
         return dataManager.getList();
     }
 
     @Override
     public ArrayList<InterfServer> getServerLists() throws RemoteException {
-        //tr? v? dánh sách server có k?t nôi
+        //tr? v? dï¿½nh sï¿½ch server cï¿½ k?t nï¿½i
         return servers;
     }
 
@@ -62,7 +74,12 @@ public class RMIDatabase extends UnicastRemoteObject implements InterfDatabase {
             if (!checkAdd) break;
         }
         //if add success to all client --> return
-        return checkAdd && servers.add(server);
+        boolean isAdd = checkAdd && servers.add(server);
+        if(isAdd && cclog != null){
+            cclog.log("Register new Server: "+server.getIP() , CCColor.BLACK);
+        }
+      
+        return isAdd;
 
     }
 
@@ -75,7 +92,11 @@ public class RMIDatabase extends UnicastRemoteObject implements InterfDatabase {
             if (!checkRemove) break;
         }
         //if remove success to all client --> return
-        return checkRemove && servers.remove(server);
+        boolean isRemove = checkRemove && servers.remove(server);
+        if(isRemove && cclog != null){
+            cclog.log("UnRegis some server: ", CCColor.RED);
+        }
+        return isRemove;
 
     }
 

@@ -22,12 +22,11 @@ public class DatabaseRun {
             String ip = Lib.getMyIp();
             if (ip == null) System.exit(0);
             System.setProperty("java.rmi.server.hostname", Lib.getMyIp());
-            //??ng ký d?ch v?
+            //??ng kï¿½ d?ch v?
             Registry r = LocateRegistry.createRegistry(Configure.PORT);
             InterfDatabase database;
             database = new RMIDatabase();
             r.rebind(Configure.DATABASE_SERVICE_NAME, database);
-
             System.out.println("serverWork at:" + Lib.getMyIp() + " port:" + Configure.PORT + " with name: " + Configure.DATABASE_SERVICE_NAME);
 
 
