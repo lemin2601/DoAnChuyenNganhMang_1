@@ -3,17 +3,23 @@
     <editor-bookmarks xmlns="http://www.netbeans.org/ns/editor-bookmarks/2" lastBookmarkId="0"/>
     <open-files xmlns="http://www.netbeans.org/ns/projectui-open-files/2">
         <group>
-            <file>file:/D:/01%20Study/Semester_9/DACNMang-MVHa/BaoCaoCuoiKy/SourceDistributeTicket/src/controller/InterfServer.java</file>
             <file>file:/D:/01%20Study/Semester_9/DACNMang-MVHa/BaoCaoCuoiKy/SourceDistributeTicket/src/model/DBConnection.java</file>
-            <file>file:/D:/01%20Study/Semester_9/DACNMang-MVHa/BaoCaoCuoiKy/SourceDistributeTicket/src/controller/RMIServer.java</file>
             <file>file:/D:/01%20Study/Semester_9/DACNMang-MVHa/BaoCaoCuoiKy/SourceDistributeTicket/src/gui/ServerGUI.java</file>
-            <file>file:/D:/01%20Study/Semester_9/DACNMang-MVHa/BaoCaoCuoiKy/SourceDistributeTicket/src/bean/WaitObject.java</file>
-            <file>file:/D:/01%20Study/Semester_9/DACNMang-MVHa/BaoCaoCuoiKy/SourceDistributeTicket/src/controller/RMIDatabase.java</file>
+            <file>file:/D:/01%20Study/Semester_9/DACNMang-MVHa/BaoCaoCuoiKy/SourceDistributeTicket/src/AdditionServer.java</file>
+            <file>file:/D:/01%20Study/Semester_9/DACNMang-MVHa/BaoCaoCuoiKy/SourceDistributeTicket/security.policy</file>
+            <file>file:/D:/01%20Study/Semester_9/DACNMang-MVHa/BaoCaoCuoiKy/SourceDistributeTicket/src/Addition.java</file>
             <file>file:/D:/01%20Study/Semester_9/DACNMang-MVHa/BaoCaoCuoiKy/SourceDistributeTicket/src/lib/CCLOG.java</file>
+            <file>file:/D:/01%20Study/Semester_9/DACNMang-MVHa/BaoCaoCuoiKy/SourceDistributeTicket/src/gui/GUIDataBase.java</file>
+            <file>file:/D:/01%20Study/Semester_9/DACNMang-MVHa/BaoCaoCuoiKy/SourceDistributeTicket/src/controller/InterfServer.java</file>
+            <file>file:/D:/01%20Study/Semester_9/DACNMang-MVHa/BaoCaoCuoiKy/SourceDistributeTicket/src/controller/RMIServer.java</file>
+            <file>file:/D:/01%20Study/Semester_9/DACNMang-MVHa/BaoCaoCuoiKy/SourceDistributeTicket/src/bean/WaitObject.java</file>
+            <file>file:/D:/01%20Study/Semester_9/DACNMang-MVHa/BaoCaoCuoiKy/SourceDistributeTicket/src/AdditionClient.java</file>
+            <file>file:/D:/01%20Study/Semester_9/DACNMang-MVHa/BaoCaoCuoiKy/SourceDistributeTicket/src/controller/RMIDatabase.java</file>
             <file>file:/D:/01%20Study/Semester_9/DACNMang-MVHa/BaoCaoCuoiKy/SourceDistributeTicket/src/gui/Run.java</file>
             <file>file:/D:/01%20Study/Semester_9/DACNMang-MVHa/BaoCaoCuoiKy/SourceDistributeTicket/src/model/ModelTicket.java</file>
-            <file>file:/D:/01%20Study/Semester_9/DACNMang-MVHa/BaoCaoCuoiKy/SourceDistributeTicket/src/gui/GUIDataBase.java</file>
+            <file>file:/D:/01%20Study/Semester_9/DACNMang-MVHa/BaoCaoCuoiKy/SourceDistributeTicket/src/test.java</file>
             <file>file:/D:/01%20Study/Semester_9/DACNMang-MVHa/BaoCaoCuoiKy/SourceDistributeTicket/src/img/loading_spinner.gif</file>
+            <file>file:/D:/01%20Study/Semester_9/DACNMang-MVHa/BaoCaoCuoiKy/SourceDistributeTicket/src/AdditionalInterface.java</file>
         </group>
     </open-files>
 </project-private>
