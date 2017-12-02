@@ -480,10 +480,10 @@ public class ServerGUI extends javax.swing.JFrame {
         try {
             Registry registry = null;
             try {
-                registry = LocateRegistry.createRegistry(Configure.PORT);
+                registry = LocateRegistry.createRegistry(Configure.PORT_DATABASE);
             } catch (RemoteException ex) {
                 try {
-                    registry = LocateRegistry.getRegistry(Configure.PORT);
+                    registry = LocateRegistry.getRegistry(Configure.PORT_DATABASE);
 
                 } catch (RemoteException ex1) {
                     Logger.getLogger(GUIDataBase.class

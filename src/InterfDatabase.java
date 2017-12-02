@@ -21,10 +21,10 @@ public interface InterfDatabase extends Remote {
     ArrayList<Ticket> getTicketLists() throws RemoteException;
 
     //lấy danh sách kết nối hiện tại
-    HashMap<Integer,InterfServer>  getServerLists() throws RemoteException;
+    HashMap<Integer,String>  getServerLists() throws RemoteException;
 
     // thực hiện đăng ký việc join vào
-    boolean Register(InterfServer server) throws RemoteException;
+    boolean Register(String IpServer) throws RemoteException;
 
     //thực hiện việc hủy đăng ký
     boolean UnRegis(int idServer) throws RemoteException;

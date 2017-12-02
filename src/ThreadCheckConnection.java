@@ -1,6 +1,10 @@
 //done
+
 import conf.Configure;
+import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
+import java.rmi.registry.LocateRegistry;
+import java.rmi.registry.Registry;
 import java.util.HashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -19,7 +23,7 @@ class ThreadCheckConnection implements Runnable {
             try {
                 database.getServerLists().forEach((key, sv) -> {
                     try {
-                        sv.CheckConnection();
+                        checkConnection(sv);
                     } catch (RemoteException ex) {
                         try {
                             //remove if can't call
@@ -39,6 +43,19 @@ class ThreadCheckConnection implements Runnable {
                 Logger.getLogger(ThreadCheckConnection.class.getName()).log(Level.SEVERE, null, ex);
             }
         }
+    }
+
+    private void checkConnection(String server) throws RemoteException {
+        InterfServer hello = null;
+        try {
+            Registry r = LocateRegistry.getRegistry(server, Configure.PORT_SERVER);
+            hello = (InterfServer) r.lookup(Configure.SERVER_SERVICE_NAME);
+        } catch (RemoteException | NotBoundException e1) {
+            // TODO Auto-generated catch block
+            e1.printStackTrace();
+        }
+        hello.CheckConnection();
+
     }
 
 }

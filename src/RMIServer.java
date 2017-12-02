@@ -14,6 +14,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import lib.CCColor;
 import bean.WaitObject;
+import java.io.Serializable;
 import java.rmi.RMISecurityManager;
 import java.util.Collections;
 import java.util.ConcurrentModificationException;
@@ -27,7 +28,7 @@ public class RMIServer extends UnicastRemoteObject implements InterfServer {
     private InterfDatabase database;                              //Database  
     //data algorithm
     private long currentClock = 0;                                //đồng hồ thời gian tại client
-    private HashMap<Integer, InterfServer> hashServers;
+    private HashMap<Integer, String> hashServers;
     private HashMap<Integer, Boolean> needToSendReply;       //Danh sách hàng đợi cần gửi REP
     private HashMap<Integer, Boolean> needToReceiveRelease;  //Danh sách hàng đợi cần nhận REL
     private HashMap<Integer, Boolean> needToReceiveReply;    //Danh sách hàng đợi cần nhận REP
@@ -64,29 +65,33 @@ public class RMIServer extends UnicastRemoteObject implements InterfServer {
     //done
     public boolean start() throws RemoteException, NotBoundException {
         //khởi tạo dịch vụ ==> kết nối
-        InterfDatabase hello = null;
         try {
-            System.setProperty("java.rmi.server.hostname", "192.168.0.67");
-            Registry r = LocateRegistry.getRegistry("192.168.0.67", 1091);
-            hello = (InterfDatabase) r.lookup("ABC");
-            String remoteHostName = "192.168.06.67";
-//            int remotePort = 1091;
-//            String connectLocation = "//" + remoteHostName
-//                    + "/ABC";
-//
-//            System.out.println("Connecting to client at : " + connectLocation);
-//            hello = (AdditionalInterface) Naming.lookup("rmi:" + connectLocation);
-        } catch (RemoteException | NotBoundException e1) {
-            // TODO Auto-generated catch block
-            e1.printStackTrace();
+            System.setProperty("java.security.policy", "security.policy");
+        } catch (Exception e) {
+        
         }
-        hello.Register(this);
-//        System.setProperty("java.security.policy", "security.policy");
-//        System.setSecurityManager(new RMISecurityManager());
-//        System.setProperty("java.rmi.server.hostname", this.databaseIP);
-//        Registry r = LocateRegistry.getRegistry(this.databaseIP, Configure.PORT);
-//        database = (InterfDatabase) r.lookup(Configure.DATABASE_SERVICE_NAME);
-//        database.Register(this);
+        System.setSecurityManager(new RMISecurityManager());
+        System.setProperty("java.rmi.server.hostname", this.myIp);
+        Registry registry = null;
+        try {
+            registry = LocateRegistry.createRegistry(Configure.PORT_SERVER);
+        } catch (RemoteException ex) {
+            try {
+                registry = LocateRegistry.getRegistry(Configure.PORT_SERVER);
+            } catch (RemoteException ex1) {
+            }
+        }
+        registry.rebind(Configure.SERVER_SERVICE_NAME, this);
+        log("Started: [" + this.myIp + ":" + Configure.PORT_SERVER + "]-" + Configure.SERVER_SERVICE_NAME, CCColor.BLUE);
+        //đăng ký dịch vụ
+        InterfDatabase hello = null;
+
+        System.setProperty("java.security.policy", "security.policy");
+        System.setSecurityManager(new RMISecurityManager());
+        System.setProperty("java.rmi.server.hostname", this.databaseIP);
+        Registry r = LocateRegistry.getRegistry(this.databaseIP, Configure.PORT_DATABASE);
+        database = (InterfDatabase) r.lookup(Configure.DATABASE_SERVICE_NAME);
+        database.Register(this.myIp);
 
         threadProcessQueueMessage = new Thread(new ThreadProcessQueueMessage());
         threadProcessQueueMessage.start();
@@ -153,7 +158,7 @@ public class RMIServer extends UnicastRemoteObject implements InterfServer {
     }
 
     @Override //done
-    public boolean AddServer(int id, InterfServer server) throws RemoteException {
+    public boolean AddServer(int id, String server) throws RemoteException {
         this.needToReceiveRelease.put(id, false);
         this.needToReceiveReply.put(id, false);
         this.needToSendReply.put(id, false);
@@ -276,18 +281,16 @@ public class RMIServer extends UnicastRemoteObject implements InterfServer {
 //            });
             //gửi message
 
-            hashServers.forEach((key, value) -> {
+            hashServers.forEach((key, server) -> {
                 if (key != getMyId()) {
-                    try {
-//                        log("Send REQ to ..." + key, CCColor.BLUE);
-                        value.PushMessage(messageREQ);
-                    } catch (RemoteException ex) {
-                        Logger.getLogger(RMIServer.class.getName()).log(Level.SEVERE, null, ex);
-                    }
+
+                    sendMessage(server, messageREQ);
+
                 } else {
 //                    log("bỏ qua bản thân", CCColor.BLACK);
                 }
-            });
+            }
+            );
         }
 
         private void waitReply() {
@@ -335,14 +338,25 @@ public class RMIServer extends UnicastRemoteObject implements InterfServer {
             log(msg, CCColor.BLUE);
             //update value for myself
             hashServers.forEach((key, value) -> {
-                try {
-                    value.PushMessage(message);
-//                    log("Send REL from " + getMyId() + " to " + key, CCColor.BLUE);
-                } catch (RemoteException ex) {
-                    Logger.getLogger(RMIServer.class.getName()).log(Level.SEVERE, null, ex);
-                }
+                sendMessage(value, message);
             });
             log("==========================", CCColor.BLACK);
+        }
+
+        private void sendMessage(String server, Message messageREQ) {
+            InterfServer hello = null;
+            try {
+                Registry r = LocateRegistry.getRegistry(server, Configure.PORT_SERVER);
+                hello = (InterfServer) r.lookup(Configure.SERVER_SERVICE_NAME);
+            } catch (RemoteException | NotBoundException e1) {
+                // TODO Auto-generated catch block
+                e1.printStackTrace();
+            }
+            try {
+                hello.PushMessage(messageREQ);
+            } catch (RemoteException e1) {
+                e1.printStackTrace();
+            }
         }
 
     }
@@ -363,7 +377,7 @@ public class RMIServer extends UnicastRemoteObject implements InterfServer {
                 while (queue.hasNext()) {
                     Message message = queue.next();
                     int idFrom = message.getFrom();
-                    InterfServer from = hashServers.get(idFrom);
+                    String from = hashServers.get(idFrom);
                     //gỡ bỏ những queue đã kết thúc
                     if (needToReceiveRelease.get(idFrom) == false && idFrom == getMyId()) {
                         queue.remove();
@@ -388,22 +402,33 @@ public class RMIServer extends UnicastRemoteObject implements InterfServer {
                     } else if (needToSendReply.get(idFrom)) {
                         //send reply => create messge + pushmessage
                         Message m = new Message(getMyId(), MessageStatus.REP, getTimestamp());
-                        try {
-                            from.PushMessage(m);
-                            needToSendReply.put(idFrom, false);
-                            needToReceiveRelease.put(idFrom, true);
-                            String msg = String.format("REP send   [%2d]->all", idFrom);
-                            log(msg, CCColor.BLUE);
-                        } catch (RemoteException ex) {
-//                            log("can't push message or disconnect", CCColor.RED);
-                            Logger.getLogger(RMIServer.class.getName()).log(Level.SEVERE, null, ex);
-                        }
+                        sendMessage(from, m);
+                        needToSendReply.put(idFrom, false);
+                        needToReceiveRelease.put(idFrom, true);
+                        String msg = String.format("REP send   [%2d]->all", idFrom);
+                        log(msg, CCColor.BLUE);
+
                     }
                 }
                 waitObjectProcessMessage.waitOK();
             }
         }
 
+        private void sendMessage(String server, Message messageREQ) {
+            InterfServer hello = null;
+            try {
+                Registry r = LocateRegistry.getRegistry(server, Configure.PORT_SERVER);
+                hello = (InterfServer) r.lookup(Configure.SERVER_SERVICE_NAME);
+            } catch (RemoteException | NotBoundException e1) {
+                // TODO Auto-generated catch block
+                e1.printStackTrace();
+            }
+            try {
+                hello.PushMessage(messageREQ);
+            } catch (RemoteException e1) {
+                e1.printStackTrace();
+            }
+        }
     }
 
 //done
@@ -446,24 +471,16 @@ public class RMIServer extends UnicastRemoteObject implements InterfServer {
         return false;
     }
 
-    private void setListServer(HashMap<Integer, InterfServer> servers) {
+    private void setListServer(HashMap<Integer, String> servers) {
         this.needToReceiveRelease = new HashMap<>();
         this.needToReceiveReply = new HashMap<>();
         this.needToSendReply = new HashMap<>();
         servers.forEach((key, sv) -> {
-            try {
-                int id = sv.getID();
-                if (key != getMyId()) {
-                    this.needToReceiveRelease.put(id, false);
-                    this.needToReceiveReply.put(id, false);
-                    this.needToSendReply.put(id, false);
-                    this.hashServers.put(id, sv);
+            this.needToReceiveRelease.put(key, false);
+            this.needToReceiveReply.put(key, false);
+            this.needToSendReply.put(key, false);
+            this.hashServers.put(key, sv);
 
-                }
-            } catch (RemoteException ex) {
-                Logger.getLogger(RMIServer.class
-                        .getName()).log(Level.SEVERE, null, ex);
-            }
         });
     }
 
@@ -495,15 +512,11 @@ public class RMIServer extends UnicastRemoteObject implements InterfServer {
         //hiển thị thông tin server
         ArrayList<String> view = new ArrayList<>();
         hashServers.forEach((key, value) -> {
-            try {
-                String info = "-" + key + ": " + value.getIP();
-                System.out.println(info);
-                view.add(info);
 
-            } catch (RemoteException ex) {
-                Logger.getLogger(RMIServer.class
-                        .getName()).log(Level.SEVERE, null, ex);
-            }
+            String info = "-" + key + ": " + value;
+            System.out.println(info);
+            view.add(info);
+
         });
         if (gui != null) {
             gui.setInfo("Working: [" + this.id + ":" + this.myIp + "]");

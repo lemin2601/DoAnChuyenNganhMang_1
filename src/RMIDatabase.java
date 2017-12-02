@@ -1,3 +1,4 @@
+
 import bean.Task;
 import bean.Ticket;
 import conf.Configure;
@@ -19,7 +20,7 @@ public class RMIDatabase extends UnicastRemoteObject implements InterfDatabase {
 
     private String myIp;                        //địa chỉ ip 
     private ModelTicket modelTicket;            //model kết nối database
-    private HashMap<Integer, InterfServer> listServers;//Danh sách server kết nối chức năng
+    private HashMap<Integer, String> listServers;//Danh sách server kết nối chức năng
     private Thread threadCheckConnect;          //Thread kiểm tra kết nối các liên kết
     private int idCount;                        //count số lượng máy liên kết
     private GUIDataBase gui;                    //GUI update hiển thị và cập nhật data
@@ -50,49 +51,47 @@ public class RMIDatabase extends UnicastRemoteObject implements InterfDatabase {
             JOptionPane.showMessageDialog(gui, "Please turn on database");
             return false;
         }
-        try {
-
-            System.setProperty("java.security.policy", "security.policy");
-            System.setSecurityManager(new RMISecurityManager());
-            System.setProperty("java.rmi.server.hostname", "192.168.0.67");
-            Registry registry = null;
-            try {
-                registry = LocateRegistry.createRegistry(1091);
-            } catch (RemoteException ex) {
-                try {
-                    registry = LocateRegistry.getRegistry(1091);
-                } catch (RemoteException ex1) {
-                }
-            }
-//            Addition Hello = new Addition();
-            registry.rebind("ABC", this);
-
-//            Naming.rebind("rmi://192.168.0.67/ABC", Hello);
-
-            System.out.println("Addition Server is ready.");
-        } catch (Exception e) {
-            System.out.println("Addition Server failed: " + e);
-        }
-//        
-//        //thực hiện việc đăng ký
-//        System.setProperty("java.security.policy", "security.policy");
-//        System.setSecurityManager(new RMISecurityManager());
-////        System.setProperty("java.rmi.server.hostname", "192.168.0.67");
-//        
-//        System.setProperty("java.rmi.server.hostname", this.myIp);
-//        Registry registry = null;
 //        try {
-//            registry = LocateRegistry.createRegistry(Configure.PORT);
-//        } catch (RemoteException ex) {
+//
+//            System.setProperty("java.security.policy", "security.policy");
+//            System.setSecurityManager(new RMISecurityManager());
+//            System.setProperty("java.rmi.server.hostname", "192.168.0.67");
+//            Registry registry = null;
 //            try {
-//                registry = LocateRegistry.getRegistry(Configure.PORT);
-//            } catch (RemoteException ex1) {
+//                registry = LocateRegistry.createRegistry(1091);
+//            } catch (RemoteException ex) {
+//                try {
+//                    registry = LocateRegistry.getRegistry(1091);
+//                } catch (RemoteException ex1) {
+//                }
 //            }
+////            Addition Hello = new Addition();
+//            registry.rebind("ABC", this);
+//
+////            Naming.rebind("rmi://192.168.0.67/ABC", Hello);
+//            System.out.println("Addition Server is ready.");
+//        } catch (Exception e) {
+//            System.out.println("Addition Server failed: " + e);
 //        }
-//        registry.rebind(Configure.DATABASE_SERVICE_NAME, this);
+//        
+        //thực hiện việc đăng ký
+        
+        System.setSecurityManager(new RMISecurityManager());        
+        System.setProperty("java.security.policy", "security.policy");
+        System.setProperty("java.rmi.server.hostname", this.myIp);
+        Registry registry = null;
+        try {
+            registry = LocateRegistry.createRegistry(Configure.PORT_DATABASE);
+        } catch (RemoteException ex) {
+            try {
+                registry = LocateRegistry.getRegistry(Configure.PORT_DATABASE);
+            } catch (RemoteException ex1) {
+            }
+        }
+        registry.rebind(Configure.DATABASE_SERVICE_NAME, this);
         this.threadCheckConnect = new Thread(new ThreadCheckConnection(this));
         this.threadCheckConnect.start();
-        log("Started: [" + this.myIp + ":" + Configure.PORT + "]-" + Configure.DATABASE_SERVICE_NAME, CCColor.BLUE);
+        log("Started: [" + this.myIp + ":" + Configure.PORT_DATABASE + "]-" + Configure.DATABASE_SERVICE_NAME, CCColor.BLUE);
         return true;
     }
 
@@ -100,10 +99,10 @@ public class RMIDatabase extends UnicastRemoteObject implements InterfDatabase {
     public boolean stop() {
         Registry registry = null;
         try {
-            registry = LocateRegistry.createRegistry(Configure.PORT);
+            registry = LocateRegistry.createRegistry(Configure.PORT_DATABASE);
         } catch (RemoteException ex) {
             try {
-                registry = LocateRegistry.getRegistry(Configure.PORT);
+                registry = LocateRegistry.getRegistry(Configure.PORT_DATABASE);
             } catch (RemoteException ex1) {
 //                log(RMIDatabase.class + ex1.getMessage(), CCColor.RED);
             }
@@ -139,24 +138,21 @@ public class RMIDatabase extends UnicastRemoteObject implements InterfDatabase {
     }
 
     @Override //done
-    public HashMap<Integer, InterfServer> getServerLists() throws RemoteException {
+    public HashMap<Integer, String> getServerLists() throws RemoteException {
         return this.listServers;
     }
 
     @Override //done
-    public boolean Register(InterfServer server) throws RemoteException {
+    public boolean Register(String server) throws RemoteException {
         //add to all server else
         int id = getCount();
-        server.setId(id);
+        //set ip servert
+        setIpServerRegister(server, id);
         listServers.forEach((key, value) -> {
-            try {
-                value.AddServer(id, server);
-            } catch (RemoteException ex) {
-                Logger.getLogger(RMIDatabase.class.getName()).log(Level.SEVERE, null, ex);
-            }
+            addNewServerRegister(value, id, server);
         });
         this.listServers.put(id, server);
-        viewAddServer(id, server.getIP());
+        viewAddServer(id, server);
         return true;
     }
 
@@ -164,11 +160,8 @@ public class RMIDatabase extends UnicastRemoteObject implements InterfDatabase {
     public boolean UnRegis(int idServer) throws RemoteException {
         this.listServers.remove(idServer);
         this.listServers.forEach((key, value) -> {
-            try {
-                value.RemoveServer(idServer);
-            } catch (RemoteException ex) {
-                Logger.getLogger(RMIDatabase.class.getName()).log(Level.SEVERE, null, ex);
-            }
+
+            removeServerRegister(value, idServer);
         });
         viewRemoveServer(idServer);
         return true;
@@ -179,9 +172,7 @@ public class RMIDatabase extends UnicastRemoteObject implements InterfDatabase {
         //nothing
     }
 
-    
     //done
-
     private void log(String log, CCColor color) {
         if (gui != null) {
             gui.log(log, color);
@@ -194,13 +185,9 @@ public class RMIDatabase extends UnicastRemoteObject implements InterfDatabase {
         log("Add: [" + id + ":" + ip + "]", CCColor.BLUE);
         ArrayList<String> view = new ArrayList<>();
         this.listServers.forEach((key, value) -> {
-            try {
-                String line = "- " + key + ": " + value.getIP();
-                System.out.println(line);
-                view.add(line);
-            } catch (RemoteException ex) {
-                Logger.getLogger(RMIDatabase.class.getName()).log(Level.SEVERE, null, ex);
-            }
+            String line = "- " + key + ": " + value;
+            System.out.println(line);
+            view.add(line);
         });
         if (gui != null) {
             this.gui.viewListServer(view);
@@ -213,13 +200,9 @@ public class RMIDatabase extends UnicastRemoteObject implements InterfDatabase {
         log("Remove: server [" + id + "]", CCColor.BLUE);
         ArrayList<String> view = new ArrayList<>();
         this.listServers.forEach((key, value) -> {
-            try {
-                String line = "-" + key + ": " + value.getIP();
-                System.out.println(line);
-                view.add(line);
-            } catch (RemoteException ex) {
-                Logger.getLogger(RMIDatabase.class.getName()).log(Level.SEVERE, null, ex);
-            }
+            String line = "-" + key + ": " + value;
+            System.out.println(line);
+            view.add(line);
         });
         if (gui != null) {
             this.gui.viewListServer(view);
@@ -228,6 +211,54 @@ public class RMIDatabase extends UnicastRemoteObject implements InterfDatabase {
 
     private synchronized int getCount() {
         return this.idCount++;
+    }
+
+    private void setIpServerRegister(String server, int id) {
+        InterfServer hello = null;
+        try {
+            Registry r = LocateRegistry.getRegistry(server, Configure.PORT_SERVER);
+            hello = (InterfServer) r.lookup(Configure.SERVER_SERVICE_NAME);
+        } catch (RemoteException | NotBoundException e1) {
+            // TODO Auto-generated catch block
+            e1.printStackTrace();
+        }
+        try {
+            hello.setId(id);
+        } catch (RemoteException e1) {
+            e1.printStackTrace();
+        }
+    }
+
+    private void addNewServerRegister(String server, int id, String serverNew) {
+        InterfServer hello = null;
+        try {
+            Registry r = LocateRegistry.getRegistry(server, Configure.PORT_SERVER);
+            hello = (InterfServer) r.lookup(Configure.SERVER_SERVICE_NAME);
+        } catch (RemoteException | NotBoundException e1) {
+            // TODO Auto-generated catch block
+            e1.printStackTrace();
+        }
+        try {
+            hello.AddServer(id, serverNew);
+        } catch (RemoteException e1) {
+            e1.printStackTrace();
+        }
+    }
+
+    private void removeServerRegister(String server, int idServer) {
+        InterfServer hello = null;
+        try {
+            Registry r = LocateRegistry.getRegistry(server, Configure.PORT_SERVER);
+            hello = (InterfServer) r.lookup(Configure.SERVER_SERVICE_NAME);
+        } catch (RemoteException | NotBoundException e1) {
+            // TODO Auto-generated catch block
+            e1.printStackTrace();
+        }
+        try {
+            hello.RemoveServer(idServer);
+        } catch (RemoteException e1) {
+            e1.printStackTrace();
+        }
     }
 
 }

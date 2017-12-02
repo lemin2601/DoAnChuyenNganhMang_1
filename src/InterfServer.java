@@ -14,7 +14,7 @@ public interface InterfServer extends Remote {
     void CheckConnection() throws RemoteException;
 
     //thêm 1 client server mới và list
-    boolean AddServer(int id,InterfServer server) throws RemoteException;
+    boolean AddServer(int id,String server) throws RemoteException;
 
     // xóa một client server ra khỏi list
     boolean RemoveServer(int idServer) throws RemoteException;

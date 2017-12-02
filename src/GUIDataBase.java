@@ -1,4 +1,8 @@
+
+import java.rmi.RMISecurityManager;
 import java.rmi.RemoteException;
+import java.rmi.registry.LocateRegistry;
+import java.rmi.registry.Registry;
 import java.util.ArrayList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -156,6 +160,28 @@ public class GUIDataBase extends javax.swing.JFrame {
     }//GEN-LAST:event_btnClearLogActionPerformed
 
     private void btnAuToDetectActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnAuToDetectActionPerformed
+        try {
+
+            System.setProperty("java.security.policy", "security.policy");
+            System.setSecurityManager(new RMISecurityManager());
+            System.setProperty("java.rmi.server.hostname", "192.168.0.67");
+            Registry registry = null;
+            try {
+                registry = LocateRegistry.createRegistry(1091);
+            } catch (RemoteException ex) {
+                try {
+                    registry = LocateRegistry.getRegistry(1091);
+                } catch (RemoteException ex1) {
+                }
+            }
+            Addition Hello = new Addition();
+            registry.rebind("ABC", Hello);
+
+//            Naming.rebind("rmi://192.168.0.67/ABC", Hello);
+            System.out.println("Addition Server is ready.");
+        } catch (Exception e) {
+            System.out.println("Addition Server failed: " + e);
+        }
         this.txtIP.setText(Lib.getMyIp());
         this.database.SetIP(this.txtIP.getText());
     }//GEN-LAST:event_btnAuToDetectActionPerformed
@@ -180,8 +206,8 @@ public class GUIDataBase extends javax.swing.JFrame {
         }
         if (this.isStarting) {
             this.btnStart.setText("Stop");
-           btnStart.setIcon(new javax.swing.ImageIcon(getClass().getResource("/img/Stop-red-icon.png"))); // NOI18N
-           this.txtIP.setEnabled(false);
+            btnStart.setIcon(new javax.swing.ImageIcon(getClass().getResource("/img/Stop-red-icon.png"))); // NOI18N
+            this.txtIP.setEnabled(false);
         } else {
             this.btnStart.setText("Start");
             btnStart.setIcon(new javax.swing.ImageIcon(getClass().getResource("/img/Start-icon.png"))); // NOI18N
@@ -244,9 +270,10 @@ public class GUIDataBase extends javax.swing.JFrame {
     private javax.swing.JTextField txtIP;
     // End of variables declaration//GEN-END:variables
 
-    public void log(String log,CCColor color){
+    public void log(String log, CCColor color) {
         this.cclog.log(log, color);
     }
+
     private void init() {
 
         this.cclog = new CCLOG(taLog);
@@ -259,10 +286,10 @@ public class GUIDataBase extends javax.swing.JFrame {
         }
     }
 
-    public void viewListServer(ArrayList<String> servers){
+    public void viewListServer(ArrayList<String> servers) {
         this.taListServer.setText("");
         for (String sv : servers) {
-            this.taListServer.append("\n"+ sv);
+            this.taListServer.append("\n" + sv);
         }
         this.taListServer.repaint();
     }
