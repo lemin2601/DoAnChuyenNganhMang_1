@@ -50,22 +50,46 @@ public class RMIDatabase extends UnicastRemoteObject implements InterfDatabase {
             JOptionPane.showMessageDialog(gui, "Please turn on database");
             return false;
         }
-        //thực hiện việc đăng ký
-        System.setProperty("java.security.policy", "security.policy");
-        System.setSecurityManager(new RMISecurityManager());
-//        System.setProperty("java.rmi.server.hostname", "192.168.0.67");
-        
-        System.setProperty("java.rmi.server.hostname", this.myIp);
-        Registry registry = null;
         try {
-            registry = LocateRegistry.createRegistry(Configure.PORT);
-        } catch (RemoteException ex) {
+
+            System.setProperty("java.security.policy", "security.policy");
+            System.setSecurityManager(new RMISecurityManager());
+            System.setProperty("java.rmi.server.hostname", "192.168.0.67");
+            Registry registry = null;
             try {
-                registry = LocateRegistry.getRegistry(Configure.PORT);
-            } catch (RemoteException ex1) {
+                registry = LocateRegistry.createRegistry(1091);
+            } catch (RemoteException ex) {
+                try {
+                    registry = LocateRegistry.getRegistry(1091);
+                } catch (RemoteException ex1) {
+                }
             }
+//            Addition Hello = new Addition();
+            registry.rebind("ABC", this);
+
+//            Naming.rebind("rmi://192.168.0.67/ABC", Hello);
+
+            System.out.println("Addition Server is ready.");
+        } catch (Exception e) {
+            System.out.println("Addition Server failed: " + e);
         }
-        registry.rebind(Configure.DATABASE_SERVICE_NAME, this);
+//        
+//        //thực hiện việc đăng ký
+//        System.setProperty("java.security.policy", "security.policy");
+//        System.setSecurityManager(new RMISecurityManager());
+////        System.setProperty("java.rmi.server.hostname", "192.168.0.67");
+//        
+//        System.setProperty("java.rmi.server.hostname", this.myIp);
+//        Registry registry = null;
+//        try {
+//            registry = LocateRegistry.createRegistry(Configure.PORT);
+//        } catch (RemoteException ex) {
+//            try {
+//                registry = LocateRegistry.getRegistry(Configure.PORT);
+//            } catch (RemoteException ex1) {
+//            }
+//        }
+//        registry.rebind(Configure.DATABASE_SERVICE_NAME, this);
         this.threadCheckConnect = new Thread(new ThreadCheckConnection(this));
         this.threadCheckConnect.start();
         log("Started: [" + this.myIp + ":" + Configure.PORT + "]-" + Configure.DATABASE_SERVICE_NAME, CCColor.BLUE);

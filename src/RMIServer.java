@@ -64,12 +64,29 @@ public class RMIServer extends UnicastRemoteObject implements InterfServer {
     //done
     public boolean start() throws RemoteException, NotBoundException {
         //khởi tạo dịch vụ ==> kết nối
-        System.setProperty("java.security.policy", "security.policy");
-        System.setSecurityManager(new RMISecurityManager());
-        System.setProperty("java.rmi.server.hostname", this.databaseIP);
-        Registry r = LocateRegistry.getRegistry(this.databaseIP, Configure.PORT);
-        database = (InterfDatabase) r.lookup(Configure.DATABASE_SERVICE_NAME);
-        database.Register(this);
+        InterfDatabase hello = null;
+        try {
+            System.setProperty("java.rmi.server.hostname", "192.168.0.67");
+            Registry r = LocateRegistry.getRegistry("192.168.0.67", 1091);
+            hello = (InterfDatabase) r.lookup("ABC");
+            String remoteHostName = "192.168.06.67";
+//            int remotePort = 1091;
+//            String connectLocation = "//" + remoteHostName
+//                    + "/ABC";
+//
+//            System.out.println("Connecting to client at : " + connectLocation);
+//            hello = (AdditionalInterface) Naming.lookup("rmi:" + connectLocation);
+        } catch (RemoteException | NotBoundException e1) {
+            // TODO Auto-generated catch block
+            e1.printStackTrace();
+        }
+        hello.Register(this);
+//        System.setProperty("java.security.policy", "security.policy");
+//        System.setSecurityManager(new RMISecurityManager());
+//        System.setProperty("java.rmi.server.hostname", this.databaseIP);
+//        Registry r = LocateRegistry.getRegistry(this.databaseIP, Configure.PORT);
+//        database = (InterfDatabase) r.lookup(Configure.DATABASE_SERVICE_NAME);
+//        database.Register(this);
 
         threadProcessQueueMessage = new Thread(new ThreadProcessQueueMessage());
         threadProcessQueueMessage.start();
