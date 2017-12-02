@@ -6,19 +6,28 @@ import bean.Task;
 import java.rmi.Remote;
 import java.rmi.RemoteException;
 
-/**
- * Created by Administrator on 10/21/2017.
- */
 public interface InterfServer extends Remote {
 
     <T> T execute(Task<T> t) throws RemoteException;
-    String getIP() throws RemoteException;
-    void CheckConnection() throws  RemoteException;
-    boolean AddServer(InterfServer server) throws  RemoteException;
-    boolean RemoveServer(InterfServer server) throws  RemoteException;
-    int getID() throws  RemoteException;
-    //booking ticket
-    boolean PushMessage(Message message)throws RemoteException;
 
-    void setId(int id) throws  RemoteException;
+    //trả về địa chỉ ip của server
+    String getIP() throws RemoteException;
+
+    // kiểm tra có còn kết nối, trả về nothing
+    void CheckConnection() throws RemoteException;
+
+    //thêm 1 client server mới và list
+    boolean AddServer(int id,InterfServer server) throws RemoteException;
+
+    // xóa một client server ra khỏi list
+    boolean RemoveServer(int idServer) throws RemoteException;
+
+    //đẩy 1 message vào
+    boolean PushMessage(Message message) throws RemoteException;
+
+    //cài đặt giá trị id của server
+    void setId(int id) throws RemoteException;
+
+    // lấy thông tin id của server
+    int getID() throws RemoteException;
 }

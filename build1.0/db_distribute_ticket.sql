@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Nov 12, 2017 at 04:13 PM
+-- Generation Time: Dec 02, 2017 at 09:27 AM
 -- Server version: 10.1.26-MariaDB
 -- PHP Version: 7.1.9
 
@@ -38,8 +38,21 @@ CREATE TABLE `ticket` (
 --
 
 INSERT INTO `ticket` (`num`, `state`) VALUES
-(1, 1),
-(2, 0);
+(1, 0),
+(2, 0),
+(3, 0),
+(4, 1),
+(5, 1),
+(6, 1),
+(7, 1),
+(8, 1),
+(9, 1),
+(10, 1),
+(11, 1),
+(12, 1),
+(13, 1),
+(14, 1),
+(15, 1);
 
 --
 -- Indexes for dumped tables

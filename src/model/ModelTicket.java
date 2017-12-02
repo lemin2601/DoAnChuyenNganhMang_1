@@ -1,6 +1,7 @@
 package model;
 
 import bean.Ticket;
+import conf.Configure;
 import conf.TicketStatus;
 
 import java.sql.*;
@@ -41,7 +42,7 @@ public class ModelTicket {
     }
     public int updateTicket(Ticket ticket){
         conn = DBConnection.getConnection();
-        int i = 0;
+        int i = Configure.TICKET_UPDATE_FAILED;
         String sql = "UPDATE Ticket SET state ="+(ticket.getState()==TicketStatus.BOUGHT?1:0)+" WHERE num="+ticket.getNum();
         try {
             st = conn.createStatement();
@@ -58,7 +59,13 @@ public class ModelTicket {
         }
         return i;
     }
-
+    
+    public boolean checkConnect(){
+        if(DBConnection.getConnection() == null){
+            return false;
+        }
+        return true;
+    }
     public static void main(String[] args) {
         ModelTicket modelTicket = new ModelTicket();
         for (Ticket ticket : modelTicket.getList()) {

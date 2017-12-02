@@ -1,6 +1,6 @@
 package bean;
 
-class WaitObject {
+public class WaitObject {
     public synchronized void waitOK()   {
         try { wait(); } catch (InterruptedException e) {};
     }
